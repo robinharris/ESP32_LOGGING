@@ -101,7 +101,7 @@ bool writeSD(char* dt, int32_t lat, int32_t lon, int pm10, int pm25){
   }
   // If the data.txt file doesn't exist
   // Create a file on the SD card and write the data labels
-  File file = SD.open("/data2.txt","wa");
+  File file = SD.open("/data2.txt",FILE_APPEND);
   if(!file) {
     Serial.println("File doesn't exist");
     Serial.println("Creating file...");
