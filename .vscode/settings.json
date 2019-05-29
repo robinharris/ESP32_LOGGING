@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.osx": {
+        "PATH": "/Users/robin/.platformio/penv/bin:/Users/robin/.platformio/penv:/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/texlive/2016/bin/x86_64-darwin",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}
