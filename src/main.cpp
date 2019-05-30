@@ -9,12 +9,17 @@
 #include <FS.h>
 #include <SD.h>
 #include <SPI.h>
+#include <Adafruit_NeoPixel.h>
+
+#define pixelPin 22
+#define NUMPIXELS 1
 
 // object creation
 HardwareSerial gpsSerial(1);
 SerialPM pms(PMSx003, Serial2);         // PMSx003, UART
 NMEAGPS  gps; // This parses the GPS characters
 gps_fix  fix, oldFix; // This holds on to the latest values
+Adafruit_NeoPixel pixel(NUMPIXELS, pixelPin, NEO_GRB + NEO_KHZ800);
 
 // prototpye definitions
 void update();
@@ -25,12 +30,19 @@ Ticker timer1(update, 10 * 1000);  // every 10 seconds
 // globals
 bool newFix = false;
 #define SD_CS 5
+uint32_t green = pixel.Color(0, 255, 0);
+uint32_t orange = pixel.Color(255, 128, 0 );
+uint32_t red = pixel.Color(255, 0, 0);
+uint32_t purple = pixel.Color(255, 0, 255);
 
 void update(){
+  int pm10, pm25;
   pms.read();
+  pm10 = pms.pm10;
+  pm25 = pms.pm25;
   if(pms){  // successfull read
     Serial.printf("PM1.0 %2d, PM2.5 %2d, PM10 %2d [ug/m3]\n",
-      pms.pm01,pms.pm25,pms.pm10);
+      pms.pm01,pm25,pm10);
   }
   else { // something went wrong
     switch (pms.status) {
@@ -61,6 +73,18 @@ void update(){
       Serial.println(F(PMS_ERROR_PMS_TYPE));
       break;
     }
+  }
+  if (pm25 < 35) {
+    pixel.setPixelColor(0, green);
+  }
+  else if (pm25 < 53) {
+    pixel.setPixelColor(0, orange);
+  }
+  else if (pm25 < 70){
+    pixel.setPixelColor(0, red);
+  }
+  else {
+    pixel.setPixelColor(0, purple);
   }
   char dt[50]; // to hold dateTime as a String
   // check if we have a valid fix
@@ -121,7 +145,9 @@ void setup() {
   gpsSerial.begin(9600, SERIAL_8N1, 13, 12);
   Serial.println(F("Booted"));
   pms.init();
+  pixel.begin();
   timer1.start();
+  pixel.clear();
 }
 
 void loop() {
