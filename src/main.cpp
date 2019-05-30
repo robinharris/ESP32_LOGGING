@@ -10,8 +10,9 @@
 #include <SD.h>
 #include <SPI.h>
 #include <Adafruit_NeoPixel.h>
+#include <SSD1306Wire.h>
 
-#define pixelPin 22
+#define pixelPin 4
 #define NUMPIXELS 1
 
 // object creation
@@ -20,7 +21,7 @@ SerialPM pms(PMSx003, Serial2);         // PMSx003, UART
 NMEAGPS  gps; // This parses the GPS characters
 gps_fix  fix, oldFix; // This holds on to the latest values
 Adafruit_NeoPixel pixel(NUMPIXELS, pixelPin, NEO_GRB + NEO_KHZ800);
-
+SSD1306Wire oled(0x3c, 21, 22);
 // prototpye definitions
 void update();
 bool writeSD(char*, int32_t, int32_t, int, int);
@@ -74,6 +75,12 @@ void update(){
       break;
     }
   }
+  oled.clear();
+  String line1 = "PM10: " + String(pm10);
+  String line2 = "PM2.5: " + String(pm25);
+  oled.drawStringMaxWidth(0,0,128, line1);
+  oled.drawStringMaxWidth(0,32,128, line2);
+  oled.display();
   if (pm25 < 35) {
     pixel.setPixelColor(0, green);
   }
@@ -86,6 +93,7 @@ void update(){
   else {
     pixel.setPixelColor(0, purple);
   }
+  pixel.show();
   char dt[50]; // to hold dateTime as a String
   // check if we have a valid fix
   if (fix.valid.location && fix.valid.date && fix.valid.time) {
@@ -147,7 +155,14 @@ void setup() {
   pms.init();
   pixel.begin();
   timer1.start();
-  pixel.clear();
+  pixel.setPixelColor(0, 255,255,255);
+  pixel.show();
+  oled.init();
+  oled.flipScreenVertically();
+  oled.setFont(ArialMT_Plain_16);
+  oled.setTextAlignment(TEXT_ALIGN_LEFT);
+  oled.drawStringMaxWidth(0,0,128,"Starting AQ monitor");
+  oled.display();
 }
 
 void loop() {
